@@ -9,21 +9,26 @@ from .viewer import preview
 from .integrations import render_scad
 
 
-def generate(spec: ModelSpec, output: Path, backend="cadquery", step=True, html=True):
+def generate(spec: ModelSpec, output: Path, backend="cadquery", step=True, html=True, progress=None):
+    progress = progress or (lambda percent, message: None)
     output = output.resolve()
     if output.exists():
         raise ValueError("Pasta de saida ja existe; escolha outra para preservar os modelos")
     output.parent.mkdir(parents=True, exist_ok=True)
     with tempfile.TemporaryDirectory(dir=output.parent) as tmp:
         stage = Path(tmp)
+        progress(10, "Construindo geometria CAD")
         shape = cad.create(spec, backend)
+        progress(45, "Exportando e validando STL")
         cad.export(shape, stage / "model.stl", backend)
         report = validate(stage / "model.stl")
         if not report["valid"]:
             raise ValueError("Modelo rejeitado: " + "; ".join(report["errors"]))
         if step:
+            progress(65, "Exportando STEP")
             cad.export(shape, stage / "model.step", backend)
         if html:
+            progress(80, "Preparando visualização 3D")
             preview(stage / "model.stl", stage / "preview.html")
         report["backend"] = backend
         (stage / "validation.json").write_text(json.dumps(report, indent=2, ensure_ascii=False), encoding="utf-8")
@@ -32,6 +37,7 @@ def generate(spec: ModelSpec, output: Path, backend="cadquery", step=True, html=
         if output.exists():
             raise ValueError("Pasta de saida ja existe; escolha outra para preservar os modelos")
         stage.rename(output)
+    progress(100, "Modelo gerado e validado")
     return report
 
 

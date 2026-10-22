@@ -1,4 +1,16 @@
-# Verificacao local — versao 0.2, 21/10/2026
+# Verificacao local — versao 0.3, 21/10/2026
+
+## Desktop 0.3
+
+- PySide6 6.12.0 e QtWebEngine 6.12.0.140 instalados e executados em Windows x64/Python 3.12.15. Keyring 25.7.0 e PyInstaller 6.22.3 fixados no lock. A CLI continua utilizavel sem o extra desktop.
+- Suite completa: **72 aprovados e 7 pulados em cada ambiente CAD**; os pulados pertencem ao outro motor. Testes Qt geram peca pelos botoes Enviar/Gerar, completam nome ausente, verificam biblioteca/miniatura/STEP, cena WebGL, arestas/normais/camera, erros e resposta do event loop durante o CAD.
+- Diagnostico real em codigo-fonte gerou chaveiro TESTE, 70 x 24 x 4 mm, com STL fechado/STEP, miniatura e copia exportada dos dois formatos. A captura produzida pelo proprio teste Qt foi inspecionada e confirmou o modelo inteiro, sem corte lateral no preview. Arquivos em `.desktop-test/source-final/`, ignorados no Git.
+- Gravar/ler/remover uma credencial temporaria no cofre Windows funcionou. Nao houve uso de chaves reais. Provedor API testado com respostas controladas, sem servico remoto real; depende de endpoint/modelo compativeis com JSON. Modo local usa regras, sem IA generativa.
+- Empacotamento em pasta **gerado e executado com sucesso nesta maquina**, usando apenas build123d/OCP 8, sem CadQuery/VTK: `dist/BambuAIStudio/BambuAIStudio.exe`. Diagnostico do binario sem console retornou codigo 0: interpretacao pelo chat, geracao real de chaveiro TESTE 70 x 24 x 4 mm, miniatura/biblioteca, STL fechado, STEP e copia exportada dos dois formatos, com cena 3D confirmada e captura inspecionada. Evidencias em `.desktop-test/packaged-release/`, ignoradas no Git. Pasta completa: aproximadamente **0,90 GiB**; nao copiar somente o EXE.
+- Falhas corrigidas no empacotamento: ICU do Poppler herdada pelo PATH quebrava a importacao QtCore (a receita agora usa a ICU do Windows); IPython necessario ao build123d nao pode ser excluido; recursos nativos lib3mf sao coletados. Nao foi instalado nem modificado ICU no sistema. O binario final nao tem console; `BAMBU_PACKAGE_DEBUG=1` permite build de diagnostico. Erros de inicializacao sao registrados em `%LOCALAPPDATA%/BambuAIStudio/startup-error.log`.
+- Limitacoes: tres modelos parametricos, interpretacao local restrita, nenhum fatiamento/envio/impressao, perfil A1 mini/PLA fixo, sem teste em Windows limpo ou certificacao de drivers graficos. QtWebEngine/OpenCascade exigem espaco e memoria consideraveis; nao ha promessa de aplicacao pequena.
+
+## Base CAD preservada (0.2)
 
 Windows x64; Python 3.12.15 gerenciado pelo uv. Python 3.14 original preservado. Resolucao por metadados oficiais do PyPI antes da instalacao; `uv.lock` inclui versoes transitivas e hashes. `uv pip check` aprovou os dois ambientes.
 

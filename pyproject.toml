@@ -4,7 +4,7 @@ build-backend = "setuptools.build_meta"
 
 [project]
 name = "bambu-ai-studio"
-version = "0.2.0"
+version = "0.3.0"
 description = "Modelagem 3D local por codigo para Bambu Lab A1 Mini"
 requires-python = ">=3.12,<3.13"
 dependencies = ["numpy==2.5.4", "trimesh==5.1.1", "plotly==7.1.0", "scipy==1.18.1"]
@@ -13,9 +13,14 @@ dependencies = ["numpy==2.5.4", "trimesh==5.1.1", "plotly==7.1.0", "scipy==1.18.
 cadquery = ["cadquery==2.8.0"]
 build123d = ["build123d==0.13.0"]
 dev = ["pytest==9.1.1"]
+desktop = ["PySide6==6.12.0", "keyring==25.7.0"]
+packaging = ["pyinstaller==6.22.3"]
 
 [project.scripts]
 bambu-ai = "bambu_ai.cli:main"
+
+[project.gui-scripts]
+bambu-ai-desktop = "bambu_ai.desktop.app:main"
 
 [tool.setuptools.packages.find]
 where = ["src"]

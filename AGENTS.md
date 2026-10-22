@@ -10,6 +10,8 @@
 - STL nao preserva unidades/cores; STEP somente com motor CAD. 3MF de projeto: salvar manualmente no Bambu Studio.
 - Nunca iniciar impressao, enviar comandos a impressora ou alegar fatiamento/AMS automatico. `open-studio` apenas abre arquivo.
 - Testes: `.venv/Scripts/python.exe -m pytest -q`. Rode testes do motor alternativo no ambiente correspondente quando afetado.
+- Desktop opcional em `src/bambu_ai/desktop/`: QtWebEngine apenas na janela, CAD via `CadJob`/worker em subprocesso. Preserve CLI sem dependencia obrigatoria de Qt.
+- Dados/historico fora do repositorio em LOCALAPPDATA; API aceita somente parametros dos presets. Credenciais somente no cofre Windows, nunca em arquivos ou logs. Modo local por regras nao e IA generativa.
 - Relate motor, dimensoes, arquivos gerados, testes e limitacoes. Evite copiar manuais ou criar abstracoes sem uso.
 
 Skills locais: `.agents/skills/`. Leia apenas a que corresponde ao pedido.

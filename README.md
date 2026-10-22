@@ -1,8 +1,62 @@
-# Bambu AI Studio 0.2
+# Bambu AI Studio 0.3
 
 Repositorio publico: [igorcastro1010/bambu-ai-studio](https://github.com/igorcastro1010/bambu-ai-studio).
 
-MVP local para criar pecas parametricas por codigo com ajuda de prompts do Codex. CLI em Python, STL/STEP por CadQuery ou build123d, validacao com Trimesh e preview 3D offline. Perfil de referencia: Bambu Lab A1 mini, mesa nominal **180 x 180 x 180 mm**, PLA e AMS Lite.
+Aplicativo desktop Windows para criar, visualizar, organizar, validar e exportar pecas 3D, independente do Codex. Interface PySide6/QtWebEngine, CLI preservada, STL/STEP por CadQuery ou build123d e validacao com Trimesh. Perfil: Bambu Lab A1 mini, **180 x 180 x 180 mm**, PLA e AMS Lite.
+
+## Abrir o aplicativo no Windows
+
+Na pasta do projeto, instale o ambiente desktop uma vez:
+
+```powershell
+uv sync --locked --extra cadquery --extra desktop --extra dev
+.venv/Scripts/python.exe -m bambu_ai desktop
+```
+
+Depois, basta dar **dois cliques em `Abrir-Bambu-AI-Studio.cmd`**. Tambem funciona `bambu-ai-desktop` com o ambiente ativado. Nenhum desses comandos precisa do Codex ou de uma chave API. Para diagnosticar falhas de abertura, execute o comando Python acima em PowerShell.
+
+A janela oferece **Criar com IA**, **Meus Modelos**, **Impressao** e **Configuracoes**. No modo inicial, o chat usa regras locais, **sem IA generativa**:
+
+- `chaveiro com nome "ANA", largura 60 mm`
+- `placa com texto "OFICINA", largura 100 mm, profundidade 30 mm`
+- `suporte de celular largura 65 mm, altura 60 mm`
+
+Envie o pedido, complete os dados solicitados e confira o resumo antes de clicar em **Gerar**. Medidas nao informadas usam os presets existentes. O interpretador aceita medidas identificadas por largura, profundidade, espessura, altura, relevo, tamanho do texto e diametro do furo (mm ou cm). Nomes ausentes sao solicitados; pedidos fora dessas formas nao sao gerados. Nao interpreta desenhos livres, logos, roscas ou qualquer objeto arbitrario.
+
+O CAD roda em subprocesso; progresso por etapas e erros aparecem na interface. O visualizador integrado reutiliza o HTML offline com rotacao, zoom, faces, transparencia e normais. A biblioteca tem miniaturas geometricas, busca, renomeacao, data e dimensoes. Acoes: validar, abrir pasta, abrir STL no Bambu Studio e copiar STL/STEP para um destino novo, preservando arquivos existentes.
+
+Dados ficam em `%LOCALAPPDATA%\BambuAIStudio\`: SQLite para biblioteca/historico, configuracao JSON sem segredos e modelos em pastas unicas. O historico mostra as ultimas 100 mensagens; pendencias de conversa nao sao retomadas automaticamente apos reiniciar. Nao versionar esses dados.
+
+### Motor alternativo e API opcional
+
+CadQuery e build123d continuam separados. Para o segundo ambiente:
+
+```powershell
+$env:UV_PROJECT_ENVIRONMENT = '.venv-build123d'
+uv sync --locked --extra build123d --extra desktop --extra dev
+Remove-Item Env:UV_PROJECT_ENVIRONMENT
+```
+
+Em Configuracoes, selecione build123d e informe o caminho absoluto de `.venv-build123d\Scripts\python.exe`. O processo externo deve ter o mesmo projeto e o extra desktop instalados. Uma janela iniciada diretamente no ambiente build123d pode usar esse motor sem Python externo. Nao instale os dois motores no mesmo ambiente.
+
+O modo **API de IA compativel com JSON** e opcional. Configure URL base, modelo e, se exigida pelo servico, chave API. O adaptador envia pedidos reais para `/chat/completions`, exige resposta JSON e aceita somente parametros dos tres presets; nunca executa codigo da resposta. Requer HTTPS; HTTP e permitido apenas em localhost (por exemplo, um servidor local compativel). Redirecionamentos sao recusados. Nao existe assinatura paga obrigatoria; eventual custo e do provedor escolhido. A API recebe seu pedido e parametros da conversa, sem arquivos 3D.
+
+As chaves sao armazenadas exclusivamente no **cofre de credenciais do Windows**, vinculadas a URL, via backend Windows do keyring. Nunca entram no JSON, historico ou repositorio. Campo vazio preserva a chave salva; ha acao de remocao. O preview bloqueia requisicoes de rede. A integracao de API possui testes com respostas controladas; sem provedor real configurado, nao se declara compatibilidade validada com um servico especifico.
+
+### Empacotar para Windows
+
+A receita `packaging/BambuAIStudio.spec` cria uma distribuicao em pasta, com um unico motor CAD. Exemplo com build123d, que evita incluir VTK/CadQuery:
+
+```powershell
+$env:UV_PROJECT_ENVIRONMENT = '.venv-build123d'
+uv sync --locked --extra build123d --extra desktop --extra dev --extra packaging
+Remove-Item Env:UV_PROJECT_ENVIRONMENT
+.venv-build123d/Scripts/python.exe -m PyInstaller --noconfirm packaging/BambuAIStudio.spec
+```
+
+Distribuicao **gerada e testada nesta maquina**: `dist\BambuAIStudio\BambuAIStudio.exe`. Para usar sem Python/Codex, de dois cliques nesse EXE e preserve **toda a pasta** (aproximadamente 0,90 GiB), incluindo QtWebEngineProcess, recursos Qt e DLLs CAD. Nao e um instalador nem arquivo unico. O binario local nao e enviado ao Git. Nao houve teste em Windows limpo; detalhes em `docs/compatibilidade.md`. A interface possui apenas um WebEngineView e um trabalho CAD simultaneo; QtWebEngine e OpenCascade ainda exigem memoria/espaco significativos. Nao ha garantia de baixo consumo absoluto ou compatibilidade com todo driver grafico. Se a build empacotada nao abrir, confira `%LOCALAPPDATA%\BambuAIStudio\startup-error.log`.
+
+Diagnostico automatizado com biblioteca isolada: `dist\BambuAIStudio\BambuAIStudio.exe --smoke-test CAMINHO_ABSOLUTO_DE_TESTE`. Ele abre a janela, envia um pedido local, aciona Gerar, verifica a cena, exporta STL/STEP, grava `smoke-result.json` e uma captura da propria janela, e fecha. Os arquivos permanecem na pasta de teste; nao use uma pasta de dados pessoais para esse diagnostico. O comando Python `python -m bambu_ai.desktop.app --smoke-test CAMINHO_ABSOLUTO_DE_TESTE` oferece a mesma verificacao em codigo-fonte.
 
 ## Instalar no Windows (PowerShell)
 
@@ -47,7 +101,7 @@ Prompts para Codex neste repositorio:
 - “Use modelagem-3d para alterar a largura do suporte para 65 mm.”
 - “Use preparacao-bambu para revisar esta placa em PLA; nao iniciar impressao.”
 
-As cinco skills estao em `.agents/skills/`; `AGENTS.md` orienta economia de contexto e reutilizacao. Nao ha API de IA embutida, chave paga ou interpretador automatico de prompts: o Codex edita parametros/codigo e executa os comandos.
+As cinco skills estao preservadas em `.agents/skills/`; `AGENTS.md` orienta economia de contexto e reutilizacao. O uso por Codex continua disponivel; o desktop funciona de forma independente com regras locais ou a API opcional configurada pelo usuario.
 
 ## Motores opcionais
 

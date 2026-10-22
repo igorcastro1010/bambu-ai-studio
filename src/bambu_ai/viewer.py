@@ -31,23 +31,26 @@ def build_figure(mesh):
                                  line=dict(color="#ffb36b", width=3),
                                  marker=dict(size=[size for _ in indices for size in (0, 3, 0)]), visible=False))
     dimensions = " × ".join(f"{value:.2f}" for value in mesh.extents)
-    camera = dict(eye=dict(x=1.5, y=-1.8, z=1.3), up=dict(x=0, y=0, z=1))
+    positive = mesh.extents[mesh.extents > 1e-9]
+    geometric_mean = float(np.exp(np.log(positive).mean())) if len(positive) else 1
+    fit = max(1.0, float(mesh.extents.max()) / geometric_mean / 1.7)
+    camera = dict(eye=dict(x=1.5*fit, y=-1.8*fit, z=1.3*fit), up=dict(x=0, y=0, z=1))
     modes = []
-    for label, visible, opacity in (("Solido", [True, False, False], 1),
+    for label, visible, opacity in (("Sólido", [True, False, False], 1),
                                     ("Faces / arestas", [True, True, False], 1),
                                     ("Transparente", [True, True, False], 0.3),
                                     ("Normais", [True, True, True], 1)):
         modes.append(dict(label=label, method="restyle", args=[{"visible": visible, "opacity": [opacity, 1, 1]}]))
-    views = [dict(label="Isometrica / reset", method="relayout", args=[{"scene.camera": camera}])]
-    for label, eye, up in (("Topo", dict(x=0, y=0, z=2.5), dict(x=0, y=1, z=0)),
-                            ("Frente", dict(x=0, y=-2.5, z=0), dict(x=0, y=0, z=1)),
-                            ("Lado", dict(x=2.5, y=0, z=0), dict(x=0, y=0, z=1))):
+    views = [dict(label="Isométrica / redefinir", method="relayout", args=[{"scene.camera": camera}])]
+    for label, eye, up in (("Topo", dict(x=0, y=0, z=2.5*fit), dict(x=0, y=1, z=0)),
+                            ("Frente", dict(x=0, y=-2.5*fit, z=0), dict(x=0, y=0, z=1)),
+                            ("Lado", dict(x=2.5*fit, y=0, z=0), dict(x=0, y=0, z=1))):
         views.append(dict(label=label, method="relayout", args=[{"scene.camera": dict(eye=eye, up=up)}]))
-    figure.update_layout(title=dict(text=f"Bambu AI Studio 0.2 | {dimensions} mm (X × Y × Z)", font_size=18),
+    figure.update_layout(title=dict(text=f"Bambu AI Studio 0.3 | {dimensions} mm (X × Y × Z)", font_size=18),
                          template="plotly_dark", showlegend=False, margin=dict(l=0, r=0, b=65, t=120),
                          updatemenus=[dict(type="dropdown", buttons=modes, x=0.01, y=1.14),
                                       dict(type="dropdown", buttons=views, x=0.42, y=1.14)],
-                         annotations=[dict(text=f"{len(mesh.faces):,} faces | Arraste: girar · scroll: zoom · botao direito: mover<br>"
+                         annotations=[dict(text=f"{len(mesh.faces):,} faces | Arraste: girar · rolagem: zoom · botão direito: mover<br>"
                                                  "Faces: triangulacao STL · Normais: ate 200 amostras · Unidades assumidas em mm",
                                            x=0.5, y=-0.10, xref="paper", yref="paper", showarrow=False)],
                          scene=dict(aspectmode="data", dragmode="orbit", camera=camera,
@@ -57,7 +60,9 @@ def build_figure(mesh):
 
 def preview(source: Path, output: Path):
     figure = build_figure(load_mesh(source))
-    figure.write_html(str(output), include_plotlyjs=True, full_html=True,
+    content = figure.to_html(include_plotlyjs=True, full_html=True,
                       default_height="100vh", default_width="100%",
                       config={"displaylogo": False, "responsive": True, "scrollZoom": True})
+    content = content.replace("<head>", "<head><style>html,body{margin:0;padding:0;background:#111;overflow:hidden}</style>", 1)
+    output.write_text(content, encoding="utf-8")
     return output

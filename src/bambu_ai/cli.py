@@ -46,8 +46,12 @@ def main(argv=None):
     studio = sub.add_parser("open-studio", help="Abrir arquivo no Bambu Studio, sem imprimir")
     studio.add_argument("source", type=Path)
     sub.add_parser("doctor", help="Listar versoes instaladas")
+    sub.add_parser("desktop", help="Abrir aplicativo Windows (requer extra desktop)")
     args = parser.parse_args(argv)
     try:
+        if args.command == "desktop":
+            from .desktop.app import main as desktop_main
+            return desktop_main()
         if args.command == "generate":
             result = generate(ModelSpec.load(args.parameters), args.out, args.backend,
                               step=not args.stl_only, html=not args.no_preview)
