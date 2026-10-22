@@ -5,6 +5,7 @@ from bambu_ai.pipeline import generate
 from bambu_ai.spec import ModelSpec
 from bambu_ai.validation import validate
 from bambu_ai.viewer import preview
+from bambu_ai.cli import main
 
 ROOT = Path(__file__).resolve().parents[1]
 
@@ -58,3 +59,21 @@ def test_long_accented_name(tmp_path, backend):
     report = generate(ModelSpec(kind="keychain", text="JOAO E MARIA ÁÉÇ"),
                       tmp_path / "name", backend, html=False)
     assert report["valid"] and report["dimensions_mm"] == pytest.approx([70, 24, 4], abs=0.01)
+
+
+def test_create_real_geometry(tmp_path, backend, capsys):
+    out = tmp_path / "preset"
+    assert main(["create", "placa", "--texto", "OLA", "--largura", "80",
+                 "--out", str(out), "--backend", backend, "--no-preview"]) == 0
+    report = validate(out / "model.stl")
+    assert report["valid"] and report["dimensions_mm"] == pytest.approx([80, 35, 4], abs=0.01)
+    assert (out / "model.step").exists()
+
+
+def test_local_thin_base_is_warning_not_rejection(tmp_path, backend):
+    # Todos os eixos >0.8 mm: detectar a base fina exige medir a geometria local.
+    report = generate(ModelSpec(kind="sign", text="I", thickness=0.5),
+                      tmp_path / "thin-base", backend, html=False)
+    assert report["valid"] and min(report["dimensions_mm"]) > 0.8
+    assert report["wall_analysis"]["potentially_thin_samples"] > 0
+    assert report["wall_analysis"]["minimum_observed_mm"] == pytest.approx(0.5, abs=0.01)

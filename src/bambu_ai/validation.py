@@ -2,6 +2,7 @@
 from pathlib import Path
 import numpy as np
 import trimesh
+from .thickness import estimate_walls
 
 
 def load_mesh(path: Path):
@@ -18,14 +19,17 @@ def load_mesh(path: Path):
     return mesh
 
 
-def validate(path: Path):
+def validate(path: Path, wall_threshold=0.8):
     mesh = load_mesh(path)
     dimensions = mesh.extents
     components = len(trimesh.graph.connected_components(
         mesh.face_adjacency, nodes=np.arange(len(mesh.faces)), engine="scipy"))
     errors = []
+    edge_counts = np.bincount(mesh.edges_unique_inverse)
+    boundary_edges = int(np.count_nonzero(edge_counts == 1))
+    nonmanifold_edges = int(np.count_nonzero(edge_counts > 2))
     if not mesh.is_watertight:
-        errors.append("Malha aberta: nao estanque")
+        errors.append("Malha nao estanque: aberta ou nao manifold")
     if not mesh.is_winding_consistent:
         errors.append("Orientacao inconsistente das faces")
     if mesh.volume <= 0:
@@ -43,14 +47,23 @@ def validate(path: Path):
     bottom = mesh.triangles_center[:, 2] <= mesh.bounds[0, 2] + 0.15
     overhang = (normals[:, 2] < -np.cos(np.deg2rad(45))) & ~bottom
     area = float(mesh.area_faces[overhang].sum())
+    walls = estimate_walls(mesh, wall_threshold)
     warnings = ["Unidades assumidas em mm (STL nao registra unidades).",
-                "Nao verifica auto-intersecoes, espessura minima nem resistencia.",
+                "Nao verifica auto-intersecoes nem resistencia; espessura e apenas estimada por amostragem.",
                 "PLA: confirmar perfil e suportes no fatiador antes de imprimir."]
+    if walls["potentially_thin_samples"]:
+        warnings.append(f"Paredes potencialmente finas: {walls['potentially_thin_samples']} amostras abaixo de {wall_threshold} mm; conferir no fatiador.")
+    elif walls["status"] == "estimated":
+        warnings.append("Sem alerta nas amostras de parede; isso nao garante ausencia de paredes finas.")
+    else:
+        warnings.append("Analise de paredes indisponivel: " + walls["reason"])
     if area > 1:
         warnings.append("Faces descendentes >45 graus: revisar suportes/ponte no fatiador.")
     return {
         "valid": not errors, "dimensions_mm": dimensions.round(3).tolist(),
         "fits_a1_mini": fits, "watertight": bool(mesh.is_watertight),
+        "boundary_edges": boundary_edges, "nonmanifold_edges": nonmanifold_edges,
+        "wall_analysis": walls,
         "winding_consistent": bool(mesh.is_winding_consistent), "components": components,
         "volume_mm3": round(float(mesh.volume), 3), "triangles": len(mesh.faces),
         "overhang_area_mm2_estimate": round(area, 3), "errors": errors, "warnings": warnings,

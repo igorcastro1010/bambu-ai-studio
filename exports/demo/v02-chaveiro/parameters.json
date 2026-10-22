@@ -1,0 +1,11 @@
+{
+  "kind": "keychain",
+  "width": 80.0,
+  "depth": 24,
+  "thickness": 3,
+  "text": "BAMBU 0.2",
+  "text_size": 10,
+  "relief": 1,
+  "hole_diameter": 5,
+  "height": 55
+}

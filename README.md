@@ -1,4 +1,6 @@
-# Bambu AI Studio
+# Bambu AI Studio 0.2
+
+Repositorio publico: [igorcastro1010/bambu-ai-studio](https://github.com/igorcastro1010/bambu-ai-studio).
 
 MVP local para criar pecas parametricas por codigo com ajuda de prompts do Codex. CLI em Python, STL/STEP por CadQuery ou build123d, validacao com Trimesh e preview 3D offline. Perfil de referencia: Bambu Lab A1 mini, mesa nominal **180 x 180 x 180 mm**, PLA e AMS Lite.
 
@@ -16,6 +18,18 @@ Nao precisa ativar o ambiente. Alternativa com Python 3.12 instalado: `py -3.12 
 
 ## Gerar, editar, visualizar e validar
 
+Sem editar JSON, use os modelos `chaveiro`, `placa` e `suporte-celular`:
+
+```powershell
+.venv/Scripts/python.exe -m bambu_ai create chaveiro --nome "ANA" --largura 60 --out exports/ana
+.venv/Scripts/python.exe -m bambu_ai create placa --texto "OFICINA" --largura 100 --out exports/oficina
+.venv/Scripts/python.exe -m bambu_ai create suporte-celular --largura 65 --altura 60 --out exports/suporte-65
+```
+
+Medidas em mm: `--largura`, `--profundidade`, `--espessura`; placas/chaveiros aceitam `--nome` ou `--texto`, `--relevo`, `--tamanho-texto`; chaveiros aceitam `--diametro-furo`; suportes aceitam `--altura`. Opcoes incompativeis sao rejeitadas. `--backend build123d` usa o ambiente alternativo. `--stl-only` e `--no-preview` continuam disponiveis. Defaults estao em `src/bambu_ai/presets.py` e funcionam fora da pasta do repositorio.
+
+O fluxo anterior por JSON permanece disponivel:
+
 ```powershell
 .venv/Scripts/python.exe -m bambu_ai generate models/chaveiro.json --out exports/meu-chaveiro
 .venv/Scripts/python.exe -m bambu_ai validate exports/meu-chaveiro/model.stl
@@ -24,7 +38,7 @@ Start-Process exports/meu-chaveiro/preview.html
 .venv/Scripts/python.exe -m bambu_ai generate models/placa.json --out exports/minha-placa
 ```
 
-Cada geracao produz `model.stl`, `model.step`, `parameters.json`, `validation.json` e `preview.html`. Arraste para girar e role para zoom. HTML inclui o Plotly e funciona sem internet. Para visualizar outro STL: `python -m bambu_ai preview arquivo.stl --out exports/arquivo.html` usando o Python do ambiente.
+Cada geracao produz `model.stl`, `model.step`, `parameters.json`, `validation.json` e `preview.html`. Arraste para girar, role para zoom e use o botao direito para mover. Os menus alternam solido, faces/arestas da triangulacao, transparencia, normais amostradas e vistas topo/frente/lado/isometrica (reset). O titulo mostra dimensoes X/Y/Z em mm, com escala proporcional. HTML inclui o Plotly e funciona sem internet. Para visualizar outro STL: `python -m bambu_ai preview arquivo.stl --out exports/arquivo.html` usando o Python do ambiente.
 
 Edite uma copia do JSON para mudar nome e medidas; execute em **nova pasta**. Saidas existentes sao preservadas. Flags: `--stl-only` e `--no-preview`. Falhas de validacao impedem publicar os arquivos. Os arquivos demonstrativos ja gerados estao em `exports/demo/`. Os HTML estao disponiveis nesta instalacao, mas sao ignorados no Git; depois de clonar, gere um com `preview`.
 
@@ -69,8 +83,25 @@ No Studio, selecione A1 mini e PLA, centralize a peca, confira as camadas, brim/
 
 ## Limites e estrutura
 
-A triagem verifica malha fechada, orientacao de faces, volume positivo, faces degeneradas, um componente e dimensoes na orientacao atual. Nao verifica auto-intersecoes, paredes minimas, encaixes, estabilidade ou resistencia. A estimativa de balancos nao substitui o fatiador. STL assume mm. O limite nominal nao reserva margem para brim/purga. Os exemplos sao prototipos para conferir antes do uso, com texto em Arial e suporte de celular macico.
+A triagem verifica malha fechada (incluindo contagem de arestas de borda e nao manifold), orientacao de faces, volume positivo, faces degeneradas, um componente e dimensoes na orientacao atual. `valid` continua indicando somente esses criterios geometricos; nao significa imprimibilidade garantida.
+
+`wall_analysis` estima cordas internas por raios nas normais de ate 128 faces, amostradas proporcionalmente a area e com custo limitado. Amostras abaixo de **0,8 mm** geram aviso de paredes potencialmente finas, sem reprovar automaticamente. Para alterar o limiar: `python -m bambu_ai validate arquivo.stl --wall-threshold 1.2`. O limiar e de triagem, nao uma especificacao universal de PLA/bico. A ausencia de alertas **nao garante** espessura minima: pequenos detalhes e paredes obliquas podem escapar. Malhas abertas/mal orientadas recebem analise de paredes indisponivel. Distancias observadas nao sao uma medicao exaustiva.
+
+Nao verifica auto-intersecoes, encaixes, estabilidade ou resistencia. A estimativa de balancos nao substitui o fatiador. STL assume mm. O limite nominal nao reserva margem para brim/purga. Os exemplos sao prototipos para conferir antes do uso, com texto em Arial e suporte de celular macico.
 
 `src/bambu_ai/`: contrato, motores, pipeline, validacao, preview e integracoes. `models/`: parametros/fontes. `exports/`: gerados. `tests/`: testes de malha, geracao e comandos. `docs/compatibilidade.md`: versoes e verificacao local.
 
 Referencias oficiais: [CadQuery](https://github.com/CadQuery/cadquery), [build123d](https://github.com/gumyr/build123d), [OpenSCAD](https://github.com/openscad/openscad), [Trimesh](https://github.com/mikedh/trimesh), [Bambu Studio](https://github.com/bambulab/BambuStudio). Nenhum repositorio de referencia foi clonado.
+
+## GitHub
+
+Confira `git remote -v` e `gh auth status`. Se nao houver remoto, use a URL real de um repositorio que voce ja criou e autorizou. Substitua os valores em maiusculas; nao ha criacao automatica de repositorio:
+
+```powershell
+git config user.name "SEU_NOME"
+git config user.email "SEU_EMAIL"
+git remote add origin "URL_REAL_DO_SEU_REPOSITORIO"
+git add .
+git commit -m "feat: evolui Bambu AI Studio para v0.2"
+git push -u origin HEAD
+```

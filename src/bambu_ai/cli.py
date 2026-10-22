@@ -5,6 +5,7 @@ from pathlib import Path
 import subprocess
 import sys
 from .spec import ModelSpec
+from .presets import PRESETS, from_preset
 from .pipeline import generate, generate_scad
 from .validation import validate
 from .viewer import preview
@@ -20,8 +21,22 @@ def main(argv=None):
     build.add_argument("--backend", choices=["cadquery", "build123d"], default="cadquery")
     build.add_argument("--stl-only", action="store_true")
     build.add_argument("--no-preview", action="store_true")
+    create = sub.add_parser("create", help="Gerar chaveiro, placa ou suporte sem editar JSON (mm)")
+    create.add_argument("model", choices=PRESETS)
+    create.add_argument("--nome", "--texto", dest="text")
+    for flag, field in (("largura", "width"), ("profundidade", "depth"),
+                        ("espessura", "thickness"), ("altura", "height"),
+                        ("relevo", "relief"), ("tamanho-texto", "text_size"),
+                        ("diametro-furo", "hole_diameter")):
+        create.add_argument(f"--{flag}", dest=field, type=float, help="Medida em mm")
+    create.add_argument("--out", type=Path, required=True)
+    create.add_argument("--backend", choices=["cadquery", "build123d"], default="cadquery")
+    create.add_argument("--stl-only", action="store_true")
+    create.add_argument("--no-preview", action="store_true")
     check = sub.add_parser("validate", help="Validar STL; retorna 1 se rejeitado")
     check.add_argument("source", type=Path)
+    check.add_argument("--wall-threshold", type=float, default=0.8,
+                       help="Limiar de alerta de parede em mm (padrao: 0.8; nao e garantia)")
     view = sub.add_parser("preview", help="Gerar visualizacao HTML offline")
     view.add_argument("source", type=Path)
     view.add_argument("--out", type=Path, required=True)
@@ -36,8 +51,13 @@ def main(argv=None):
         if args.command == "generate":
             result = generate(ModelSpec.load(args.parameters), args.out, args.backend,
                               step=not args.stl_only, html=not args.no_preview)
+        elif args.command == "create":
+            parameters = {key: getattr(args, key) for key in (
+                "text", "width", "depth", "thickness", "height", "relief", "text_size", "hole_diameter")}
+            result = generate(from_preset(args.model, **parameters), args.out, args.backend,
+                              step=not args.stl_only, html=not args.no_preview)
         elif args.command == "validate":
-            result = validate(args.source)
+            result = validate(args.source, wall_threshold=args.wall_threshold)
         elif args.command == "preview":
             if args.out.suffix.lower() != ".html":
                 raise ValueError("Preview deve terminar em .html")

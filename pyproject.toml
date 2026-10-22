@@ -4,7 +4,7 @@ build-backend = "setuptools.build_meta"
 
 [project]
 name = "bambu-ai-studio"
-version = "0.1.0"
+version = "0.2.0"
 description = "Modelagem 3D local por codigo para Bambu Lab A1 Mini"
 requires-python = ">=3.12,<3.13"
 dependencies = ["numpy==2.5.4", "trimesh==5.1.1", "plotly==7.1.0", "scipy==1.18.1"]

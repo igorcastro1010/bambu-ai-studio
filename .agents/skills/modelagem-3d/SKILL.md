@@ -10,8 +10,8 @@ Use para novas geometrias ou alteracoes dimensionais. Para um nome diferente, pr
 3. Preserve base plana, folgas explicitas e parametros editaveis. Nao invente requisitos mecanicos.
 4. Gere em pasta nova, confira `validation.json` e abra o preview. Relate medidas e limites.
 
-Exemplo: “Crie suporte de celular com 65 mm de largura”. Copie `models/suporte-celular.json`, edite `width` e execute:
+Exemplo: “Crie suporte de celular com 65 mm de largura”. Reutilize o preset sem editar JSON:
 ```powershell
-.venv/Scripts/python.exe -m bambu_ai generate models/meu-suporte.json --out exports/meu-suporte
+.venv/Scripts/python.exe -m bambu_ai create suporte-celular --largura 65 --out exports/meu-suporte
 ```
 STL/STEP via CAD; `.scad` pelo comando `render-scad`, apenas STL. Nao chamar impressora.

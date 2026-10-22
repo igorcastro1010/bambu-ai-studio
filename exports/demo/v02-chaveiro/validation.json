@@ -1,0 +1,50 @@
+{
+  "valid": true,
+  "dimensions_mm": [
+    80.0,
+    24.0,
+    4.0
+  ],
+  "fits_a1_mini": true,
+  "watertight": true,
+  "boundary_edges": 0,
+  "nonmanifold_edges": 0,
+  "wall_analysis": {
+    "status": "estimated",
+    "method": "sampled_inward_normal_rays",
+    "threshold_mm": 0.8,
+    "sampled_faces": 58,
+    "hit_count": 58,
+    "potentially_thin_samples": 1,
+    "minimum_observed_mm": 0.7098,
+    "thin_face_indices": [
+      2401
+    ],
+    "limitation": "Amostragem de cordas internas; pode perder paredes pequenas/obliquas. Nao certifica espessura minima ou imprimibilidade."
+  },
+  "winding_consistent": true,
+  "components": 1,
+  "volume_mm3": 5825.431,
+  "triangles": 7858,
+  "overhang_area_mm2_estimate": 0.0,
+  "errors": [],
+  "warnings": [
+    "Unidades assumidas em mm (STL nao registra unidades).",
+    "Nao verifica auto-intersecoes nem resistencia; espessura e apenas estimada por amostragem.",
+    "PLA: confirmar perfil e suportes no fatiador antes de imprimir.",
+    "Paredes potencialmente finas: 1 amostras abaixo de 0.8 mm; conferir no fatiador."
+  ],
+  "preparation": {
+    "printer": "Bambu Lab A1 mini",
+    "material": "PLA",
+    "bed_mm": [
+      180,
+      180,
+      180
+    ],
+    "orientation": "Base plana em Z minimo; centralizar no fatiador",
+    "ams_lite": "Ate 4 filamentos; STL e monocor. Atribuir cores manualmente no Bambu Studio.",
+    "margin": "Reservar espaco adicional para brim/purga; limite nominal nao garante fatiamento."
+  },
+  "backend": "cadquery"
+}
