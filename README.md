@@ -1,3 +1,15 @@
+<p align="center"><img src="assets/github-cover.svg" alt="Bambu AI Studio" width="100%"></p>
+
+> **Bambu AI Studio** · Criação, visualização e validação de peças 3D no Windows.
+>
+> Python · Qt · CAD
+
+[Documentação](#documentação) · [Arquivos](https://github.com/igorcastro1010/bambu-ai-studio) · [Mais projetos](https://github.com/igorcastro1010)
+
+---
+
+## Documentação
+
 # Bambu AI Studio 0.3
 
 Repositorio publico: [igorcastro1010/bambu-ai-studio](https://github.com/igorcastro1010/bambu-ai-studio).
