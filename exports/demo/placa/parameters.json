@@ -1,0 +1,11 @@
+{
+  "kind": "sign",
+  "width": 120,
+  "depth": 35,
+  "thickness": 3,
+  "text": "BAMBU STUDIO",
+  "text_size": 12,
+  "relief": 1,
+  "hole_diameter": 5,
+  "height": 55
+}

@@ -1,0 +1,11 @@
+{
+  "kind": "phone_stand",
+  "width": 60,
+  "depth": 70,
+  "thickness": 3,
+  "text": "BAMBU",
+  "text_size": 10,
+  "relief": 1,
+  "hole_diameter": 5,
+  "height": 55
+}

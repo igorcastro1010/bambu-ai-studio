@@ -1,0 +1,34 @@
+{
+  "valid": true,
+  "dimensions_mm": [
+    70.0,
+    24.0,
+    4.0
+  ],
+  "fits_a1_mini": true,
+  "watertight": true,
+  "winding_consistent": true,
+  "components": 1,
+  "volume_mm3": 5043.773,
+  "triangles": 4058,
+  "overhang_area_mm2_estimate": 0.0,
+  "errors": [],
+  "warnings": [
+    "Unidades assumidas em mm (STL nao registra unidades).",
+    "Nao verifica auto-intersecoes, espessura minima nem resistencia.",
+    "PLA: confirmar perfil e suportes no fatiador antes de imprimir."
+  ],
+  "preparation": {
+    "printer": "Bambu Lab A1 mini",
+    "material": "PLA",
+    "bed_mm": [
+      180,
+      180,
+      180
+    ],
+    "orientation": "Base plana em Z minimo; centralizar no fatiador",
+    "ams_lite": "Ate 4 filamentos; STL e monocor. Atribuir cores manualmente no Bambu Studio.",
+    "margin": "Reservar espaco adicional para brim/purga; limite nominal nao garante fatiamento."
+  },
+  "backend": "cadquery"
+}
